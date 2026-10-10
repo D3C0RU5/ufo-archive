@@ -1,223 +1,139 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import EarthGlobe from './EarthGlobe.jsx'
+import { sightings } from './sightings.js'
 
-const records = [
-  {
-    id: '001',
-    type: 'Sinal',
-    title: 'O primeiro contato é uma pergunta.',
-    description: 'Um convite para observar padrões, perspectivas e o que ainda não sabemos nomear.',
-    meta: 'OBSERVAÇÃO / 01',
-    visual: 'signal',
-  },
-  {
-    id: '002',
-    type: 'Imagem',
-    title: 'Há mais do que os olhos alcançam.',
-    description: 'Luz, sombra e distância transformam a maneira como percebemos o desconhecido.',
-    meta: 'OBSERVAÇÃO / 02',
-    visual: 'planet',
-  },
-  {
-    id: '003',
-    type: 'Nota',
-    title: 'Toda descoberta começa aqui.',
-    description: 'Um arquivo aberto para a curiosidade, organizado para uma exploração mais clara.',
-    meta: 'OBSERVAÇÃO / 03',
-    visual: 'grid',
-  },
-]
-
-const filters = ['Todos', 'Sinal', 'Imagem', 'Nota']
-
-function OrbitMark({ small = false }) {
+function OrbitMark() {
   return (
-    <span className={`orbit-mark ${small ? 'orbit-mark--small' : ''}`} aria-hidden="true">
+    <span className="orbit-mark" aria-hidden="true">
       <span className="orbit-mark__core" />
     </span>
   )
 }
 
-function ArrowIcon({ diagonal = false }) {
-  return diagonal ? (
-    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
-      <path d="M3 12 12 3M4 3h8v8" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  ) : (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-      <path d="M2.5 9h12m-5-5 5 5-5 5" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  )
-}
-
-function Header() {
-  const [menuOpen, setMenuOpen] = useState(false)
-
-  const closeMenu = () => setMenuOpen(false)
-
-  return (
-    <header className="site-header">
-      <a className="brand" href="#inicio" onClick={closeMenu} aria-label="Orbital, voltar ao início">
-        <OrbitMark />
-        <span className="brand__name">ORBITAL<span className="brand__dot">.</span></span>
-        <span className="brand__divider" />
-        <span className="brand__descriptor">ARQUIVO DE OBSERVAÇÃO</span>
-      </a>
-
-      <button
-        className="menu-toggle"
-        type="button"
-        aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
-        aria-expanded={menuOpen}
-        onClick={() => setMenuOpen((open) => !open)}
-      >
-        <span />
-        <span />
-      </button>
-
-      <nav className={`nav ${menuOpen ? 'nav--open' : ''}`} aria-label="Navegação principal">
-        <a href="#inicio" onClick={closeMenu}>Início</a>
-        <a href="#registros" onClick={closeMenu}>Registros</a>
-        <a href="#sobre" onClick={closeMenu}>Sobre</a>
-        <a className="nav__access" href="#registros" onClick={closeMenu}>
-          Explorar arquivo <ArrowIcon diagonal />
-        </a>
-      </nav>
-    </header>
-  )
-}
-
-function Hero() {
-  return (
-    <section className="hero" id="inicio" aria-labelledby="hero-title">
-      <div className="hero__topline mono">
-        <span><span className="live-dot" /> SISTEMA DE OBSERVAÇÃO ATIVO</span>
-        <span className="hero__topline-right">COORD. 00° 00′ 00″ / ORIGEM: TERRA</span>
-      </div>
-
-      <div className="hero__stage">
-        <div className="hero__copy">
-          <p className="eyebrow"><span className="eyebrow__line" /> ARQUIVO 001 — O PONTO DE PARTIDA</p>
-          <h1 id="hero-title">O universo<br />começa <em>aqui.</em></h1>
-          <p className="hero__description">Uma nova perspectiva sobre tudo aquilo que ainda não conseguimos explicar.</p>
-          <a className="primary-button" href="#registros">Explorar registros <ArrowIcon /></a>
-        </div>
-
-        <div className="planet-scene">
-          <div className="planet-scene__orbit planet-scene__orbit--one" />
-          <div className="planet-scene__orbit planet-scene__orbit--two" />
-          <EarthGlobe />
-          <span className="planet-scene__cross planet-scene__cross--top" aria-hidden="true">+</span>
-          <span className="planet-scene__cross planet-scene__cross--bottom" aria-hidden="true">+</span>
-        </div>
-
-        <div className="hero__side-note mono">
-          <span className="hero__side-rule" />
-          <span>OLHE PARA CIMA.<br />PENSE ALÉM.</span>
-          <span className="hero__side-index">01 / 03</span>
-        </div>
-      </div>
-
-      <div className="hero__bottomline mono">
-        <span>UM PROJETO VISUAL SOBRE O DESCONHECIDO</span>
-        <a href="#registros">DESÇA PARA EXPLORAR <span aria-hidden="true">↓</span></a>
-      </div>
-    </section>
-  )
-}
-
-function Records() {
-  const [activeFilter, setActiveFilter] = useState('Todos')
-  const visibleRecords = activeFilter === 'Todos'
-    ? records
-    : records.filter((record) => record.type === activeFilter)
-
-  return (
-    <section className="records section-shell" id="registros" aria-labelledby="records-title">
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow"><span className="eyebrow__line" /> 02 / ACERVO</p>
-          <h2 id="records-title">O que vemos.<br /><em>O que imaginamos.</em></h2>
-        </div>
-        <p>Três fragmentos conceituais para explorar as possibilidades além do horizonte.</p>
-      </div>
-
-      <div className="filter-bar" aria-label="Filtrar registros">
-        <span className="filter-bar__label mono">FILTRAR POR TIPO</span>
-        <div className="filter-bar__options">
-          {filters.map((filter) => (
-            <button
-              key={filter}
-              className={`filter-button ${activeFilter === filter ? 'filter-button--active' : ''}`}
-              type="button"
-              aria-pressed={activeFilter === filter}
-              onClick={() => setActiveFilter(filter)}
-            >
-              {filter}
-            </button>
-          ))}
-        </div>
-        <span className="filter-bar__count mono">{String(visibleRecords.length).padStart(2, '0')} ITENS</span>
-      </div>
-
-      <div className="record-grid">
-        {visibleRecords.map((record) => (
-          <article className="record-card" key={record.id}>
-            <div className={`record-card__visual record-card__visual--${record.visual}`} aria-hidden="true">
-              {record.visual === 'signal' && <span className="signal-shape"><i /><i /><i /></span>}
-              {record.visual === 'planet' && <img src="/planet.webp" alt="" loading="lazy" />}
-              {record.visual === 'grid' && <span className="grid-shape"><i /><i /><i /><i /></span>}
-              <span className="record-card__visual-id mono">ORBITAL / {record.id}</span>
-            </div>
-            <div className="record-card__content">
-              <div className="record-card__meta mono"><span>{record.meta}</span><span>{record.type.toUpperCase()}</span></div>
-              <h3>{record.title}</h3>
-              <p>{record.description}</p>
-              <span className="record-card__arrow" aria-hidden="true"><ArrowIcon diagonal /></span>
-            </div>
-          </article>
-        ))}
-      </div>
-      <p className="records__footnote mono">* CONTEÚDO CONCEITUAL PARA DEMONSTRAÇÃO DO DESIGN SYSTEM.</p>
-    </section>
-  )
-}
-
-function About() {
-  return (
-    <section className="about section-shell" id="sobre" aria-labelledby="about-title">
-      <div className="about__mark"><OrbitMark /></div>
-      <div className="about__content">
-        <p className="eyebrow"><span className="eyebrow__line" /> 03 / SOBRE O PROJETO</p>
-        <h2 id="about-title">A curiosidade é o nosso<br /><em>ponto de partida.</em></h2>
-        <p>Orbital é um estudo visual inspirado na linguagem de arquivos públicos e exploração espacial. Criado para transformar informação em uma experiência clara, envolvente e aberta a novas perguntas.</p>
-        <a href="#inicio" className="text-link">Voltar ao início <span aria-hidden="true">↑</span></a>
-      </div>
-      <span className="about__coords mono">ORIGEM / PLANETA TERRA<br />STATUS / EM OBSERVAÇÃO</span>
-    </section>
-  )
-}
-
-function Footer() {
-  return (
-    <footer className="footer section-shell">
-      <div className="footer__brand"><OrbitMark small /> <span>ORBITAL.</span></div>
-      <span className="mono">PROJETO CONCEITUAL INDEPENDENTE / 2026</span>
-      <a href="#inicio" className="mono">VOLTAR AO TOPO ↑</a>
-    </footer>
-  )
-}
-
 export default function App() {
+  const [selectedId, setSelectedId] = useState(null)
+  const [imageIndex, setImageIndex] = useState(0)
+  const detailRef = useRef(null)
+  const panelRef = useRef(null)
+  const selected = sightings.find(({ id }) => id === selectedId)
+  const selectedImage = selected?.images[imageIndex]
+
+  function selectSighting(id) {
+    setSelectedId(id)
+    setImageIndex(0)
+  }
+
+  useEffect(() => {
+    if (selectedId && window.matchMedia('(max-width: 760px)').matches) {
+      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    } else if (selectedId) {
+      panelRef.current?.scrollTo({ top: 0 })
+    }
+  }, [selectedId])
+
   return (
     <>
-      <Header />
-      <main>
-        <Hero />
-        <Records />
-        <About />
+      <header className="site-header">
+        <a className="brand" href="#inicio" aria-label="Orbital, voltar ao início">
+          <OrbitMark />
+          <span className="brand__name">ORBITAL<span className="brand__dot">.</span></span>
+        </a>
+        <span className="site-header__context mono">ARQUIVO DE AVISTAMENTOS</span>
+        <span className="site-header__count mono">{String(sightings.length).padStart(2, '0')} RELATOS</span>
+      </header>
+
+      <main className="explorer" id="inicio">
+        <section className="explorer__map" aria-labelledby="map-title">
+          <div className="explorer__map-heading">
+            <div>
+              <p className="eyebrow"><span className="live-dot" /> MAPA INTERATIVO</p>
+              <h1 id="map-title">Avistamentos <em>no globo.</em></h1>
+            </div>
+            <span className="explorer__map-count mono">{String(sightings.length).padStart(2, '0')} PONTOS</span>
+          </div>
+          <div className="planet-scene">
+            <span className="planet-scene__orbit planet-scene__orbit--one" aria-hidden="true" />
+            <span className="planet-scene__orbit planet-scene__orbit--two" aria-hidden="true" />
+            <EarthGlobe selectedSightingId={selectedId} onSelectSighting={selectSighting} />
+          </div>
+          <p className="explorer__map-note mono">PONTOS APROXIMADOS · ARRASTE O GLOBO PARA EXPLORAR</p>
+        </section>
+
+        <aside className="explorer__panel" ref={panelRef} aria-labelledby="panel-title">
+          <div className="explorer__panel-heading">
+            <p className="eyebrow">ARQUIVO / RELATOS</p>
+            <h2 id="panel-title">Explore os casos</h2>
+            <p>Selecione um relato no mapa ou na lista.</p>
+          </div>
+
+          <div className="sighting-list" aria-label="Relatos disponíveis">
+            {sightings.map((sighting, index) => (
+              <button
+                key={sighting.id}
+                className={`sighting-list__item ${selectedId === sighting.id ? 'sighting-list__item--active' : ''}`}
+                type="button"
+                aria-label={`Selecionar ${sighting.title}, ${sighting.location}`}
+                aria-pressed={selectedId === sighting.id}
+                onClick={() => selectSighting(sighting.id)}
+              >
+                <span className="sighting-list__number mono">{String(index + 1).padStart(2, '0')}</span>
+                <span className="sighting-list__text">
+                  <strong>{sighting.mapLabel}</strong>
+                </span>
+                <span className="sighting-list__arrow" aria-hidden="true">↗</span>
+              </button>
+            ))}
+          </div>
+
+          {selected ? (
+            <article className="sighting-detail" ref={detailRef} aria-live="polite">
+              <div className="sighting-detail__heading">
+                <span className="sighting-detail__date mono">{selected.date}</span>
+                <h3>{selected.title}</h3>
+                <p className="sighting-detail__location">{selected.location}</p>
+              </div>
+              <p className="sighting-detail__description">{selected.description}</p>
+              <div className="sighting-gallery" aria-label={`Imagens relacionadas a ${selected.title}`}>
+                <a className={`sighting-gallery__main ${selectedImage.kind === 'photo' ? 'sighting-gallery__main--photo' : ''}`} href={selectedImage.src} target="_blank" rel="noopener noreferrer" aria-label={`Ampliar imagem: ${selectedImage.caption}`}>
+                  <img src={selectedImage.src} alt={selectedImage.alt} />
+                  <span className="sighting-gallery__zoom mono">AMPLIAR ↗</span>
+                </a>
+                <div className="sighting-gallery__caption">
+                  <span>{selectedImage.caption}</span>
+                  <a href={selectedImage.creditUrl} target="_blank" rel="noopener noreferrer">{selectedImage.credit} ↗</a>
+                </div>
+                {selected.images.length > 1 && (
+                  <div className="sighting-gallery__thumbs" aria-label="Escolher imagem">
+                    {selected.images.map((galleryImage, index) => (
+                      <button
+                        key={galleryImage.src}
+                        className={imageIndex === index ? 'sighting-gallery__thumb--active' : ''}
+                        type="button"
+                        aria-label={`Imagem ${index + 1}: ${galleryImage.caption}`}
+                        aria-pressed={imageIndex === index}
+                        onClick={() => setImageIndex(index)}
+                      >
+                        <img src={galleryImage.src} alt="" loading="lazy" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <a className="sighting-detail__source mono" href={selected.sourceUrl} target="_blank" rel="noopener noreferrer">ABRIR FONTE DO RELATO ↗</a>
+            </article>
+          ) : (
+            <div className="sighting-empty" aria-hidden="true">
+              <span>◎</span>
+              <p>Escolha um ponto para ver o relato e as imagens aqui.</p>
+            </div>
+          )}
+        </aside>
       </main>
-      <Footer />
+
+      <footer className="site-footer mono">
+        <span>ORBITAL / ARQUIVO DE OBSERVAÇÃO</span>
+        <span>LOCALIZAÇÕES APROXIMADAS · IMAGENS IDENTIFICADAS PELA FONTE</span>
+      </footer>
     </>
   )
 }

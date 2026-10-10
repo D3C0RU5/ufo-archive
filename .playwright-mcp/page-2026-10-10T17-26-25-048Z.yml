@@ -1,0 +1,51 @@
+- generic [ref=f4e2]:
+  - banner [ref=f4e3]:
+    - link "Orbital, voltar ao início" [ref=f4e4] [cursor=pointer]:
+      - /url: "#inicio"
+      - generic [ref=f4e7]: ORBITAL.
+    - generic [ref=f4e8]: 04 RELATOS
+  - main [ref=f4e9]:
+    - region [ref=f4e10]:
+      - generic [ref=f4e12]:
+        - paragraph [ref=f4e13]: MAPA INTERATIVO
+        - heading [level=1] [ref=f4e15]:
+          - text: Avistamentos
+          - emphasis [ref=f4e16]: no globo.
+      - generic [ref=f4e17]:
+        - img "Globo 3D da Terra. Arraste para girar ou use as setas do teclado. O lado iluminado acompanha a posição real do Sol." [ref=f4e18]
+        - generic: ARRASTE PARA GIRAR
+        - group "Tipo de mapa" [ref=f4e19]:
+          - button "SATÉLITE" [pressed] [ref=f4e20] [cursor=pointer]
+          - button "ATLAS" [ref=f4e21] [cursor=pointer]
+          - button "HOLOGRAMA" [ref=f4e22] [cursor=pointer]
+        - button "↺ REORIENTAR" [ref=f4e23] [cursor=pointer]
+        - generic: DIA / NOITE · 17:26 UTC
+      - paragraph [ref=f4e24]: PONTOS APROXIMADOS · ARRASTE O GLOBO PARA EXPLORAR
+    - complementary [ref=f4e25]:
+      - generic [ref=f4e26]:
+        - paragraph [ref=f4e27]: ARQUIVO / RELATOS
+        - heading "Explore os casos" [level=2] [ref=f4e28]
+        - paragraph [ref=f4e29]: Selecione um relato no mapa ou na lista.
+      - generic "Relatos disponíveis" [ref=f4e30]:
+        - button "Selecionar Operação Prato, Colares, Pará · Brasil" [ref=f4e31] [cursor=pointer]:
+          - generic [ref=f4e32]: "01"
+          - strong [ref=f4e34]: Operação Prato
+          - generic [aria-hidden] [ref=f4e35]: ↗
+        - button "Selecionar Noite Oficial dos OVNIs, São José dos Campos, SP · Brasil" [ref=f4e36] [cursor=pointer]:
+          - generic [ref=f4e37]: "02"
+          - strong [ref=f4e39]: Noite Oficial
+          - generic [aria-hidden] [ref=f4e40]: ↗
+        - button "Selecionar Luzes de Rendlesham, Suffolk · Reino Unido" [ref=f4e41] [cursor=pointer]:
+          - generic [ref=f4e42]: "03"
+          - strong [ref=f4e44]: Rendlesham
+          - generic [aria-hidden] [ref=f4e45]: ↗
+        - button "Selecionar Relatos de Washington, Washington, DC · Estados Unidos" [ref=f4e46] [cursor=pointer]:
+          - generic [ref=f4e47]: "04"
+          - strong [ref=f4e49]: Washington
+          - generic [aria-hidden] [ref=f4e50]: ↗
+      - generic [aria-hidden] [ref=f4e51]:
+        - generic [ref=f4e52]: ◎
+        - paragraph [ref=f4e53]: Escolha um ponto para ver o relato e as imagens aqui.
+  - contentinfo [ref=f4e54]:
+    - generic [ref=f4e55]: ORBITAL / ARQUIVO DE OBSERVAÇÃO
+    - generic [ref=f4e56]: LOCALIZAÇÕES APROXIMADAS · IMAGENS IDENTIFICADAS PELA FONTE

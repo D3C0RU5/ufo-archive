@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { getInitialYaw, getSunDirection } from './solar.js'
+import { sightings } from './sightings.js'
 
 const VERTEX_SHADER = `
   attribute vec3 aPosition;
@@ -180,12 +181,12 @@ function createBordersCanvas(data) {
   const context = canvas.getContext('2d')
   context.fillStyle = '#000'
   context.fillRect(0, 0, canvas.width, canvas.height)
-  context.lineCap = 'round'
-  context.lineJoin = 'round'
+  context.lineCap = 'butt'
+  context.lineJoin = 'bevel'
 
   for (const [category, color, width, dash] of [
-    ['regular', '#f00', 1.5, []],
-    ['disputed', '#0f0', 1.5, [5, 4]],
+    ['regular', '#f00', 0.5, []],
+    ['disputed', '#0f0', 0.5, [5, 4]],
   ]) {
     context.strokeStyle = color
     context.lineWidth = width
@@ -221,18 +222,44 @@ function rotationMatrix(yaw, pitch) {
   ])
 }
 
+function projectSightings(rotation) {
+  return sightings.flatMap((sighting) => {
+    const latitude = sighting.latitude * Math.PI / 180
+    const longitude = sighting.longitude * Math.PI / 180
+    const position = [
+      Math.cos(latitude) * Math.sin(longitude),
+      Math.sin(latitude),
+      Math.cos(latitude) * Math.cos(longitude),
+    ]
+    const rotated = [
+      rotation[0] * position[0] + rotation[3] * position[1] + rotation[6] * position[2],
+      rotation[1] * position[0] + rotation[4] * position[1] + rotation[7] * position[2],
+      rotation[2] * position[0] + rotation[5] * position[1] + rotation[8] * position[2],
+    ]
+    if (rotated[2] <= 0.12) return []
+    return [{ id: sighting.id, left: 50 + rotated[0] * 43, top: 50 - rotated[1] * 43 }]
+  })
+}
+
 function formatUtc(date) {
   return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')} UTC`
 }
 
-export default function EarthGlobe() {
+export default function EarthGlobe({ selectedSightingId, onSelectSighting }) {
   const canvasRef = useRef(null)
   const resetRef = useRef(() => {})
   const setMapStyleRef = useRef(() => {})
+  const focusSightingRef = useRef(() => {})
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
   const [mapStyle, setMapStyle] = useState('satellite')
+  const [markers, setMarkers] = useState([])
   const [utcTime, setUtcTime] = useState(() => formatUtc(new Date()))
+
+  useEffect(() => {
+    const sighting = sightings.find(({ id }) => id === selectedSightingId)
+    if (sighting && ready) focusSightingRef.current(sighting)
+  }, [selectedSightingId, ready])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -307,6 +334,7 @@ export default function EarthGlobe() {
         gl.uniform1f(cloudOffsetLocation, ((Date.now() / 1000) % 43200) / 43200)
         gl.uniform1f(mapStyleLocation, activeMapStyle === 'hologram' ? 2 : activeMapStyle === 'atlas' ? 1 : 0)
         gl.drawElements(gl.TRIANGLES, sphere.indices.length, gl.UNSIGNED_SHORT, 0)
+        setMarkers(projectSightings(rotation))
       }
 
       function resize() {
@@ -425,6 +453,11 @@ export default function EarthGlobe() {
         activeMapStyle = style
         draw()
       }
+      focusSightingRef.current = (sighting) => {
+        yaw = -sighting.longitude * Math.PI / 180
+        pitch = Math.max(-1.2, Math.min(1.2, sighting.latitude * Math.PI / 180))
+        draw()
+      }
       canvas.addEventListener('pointerdown', onPointerDown)
       canvas.addEventListener('pointermove', onPointerMove)
       canvas.addEventListener('pointerup', onPointerUp)
@@ -439,6 +472,7 @@ export default function EarthGlobe() {
         disposed = true
         resetRef.current = () => {}
         setMapStyleRef.current = () => {}
+        focusSightingRef.current = () => {}
         window.clearInterval(clockInterval)
         borderController.abort()
         resizeObserver.disconnect()
@@ -474,6 +508,24 @@ export default function EarthGlobe() {
         aria-label="Globo 3D da Terra. Arraste para girar ou use as setas do teclado. O lado iluminado acompanha a posição real do Sol."
       />
       {mapStyle === 'hologram' && !failed && <span className="planet-scene__holo-scan" aria-hidden="true" />}
+      {!failed && markers.map(({ id, left, top }) => {
+        const sighting = sightings.find((item) => item.id === id)
+        return (
+          <button
+            key={id}
+            className={`planet-scene__sighting-marker ${left > 58 ? 'planet-scene__sighting-marker--left' : ''}`}
+            type="button"
+            style={{ left: `${left}%`, top: `${top}%` }}
+            title={sighting.title}
+            aria-label={`Selecionar relato: ${sighting.title}, ${sighting.location}`}
+            aria-pressed={selectedSightingId === id}
+            onClick={() => onSelectSighting(id)}
+          >
+            <span className="planet-scene__sighting-point" aria-hidden="true" />
+            <span className="planet-scene__sighting-name" aria-hidden="true">{sighting.mapLabel}</span>
+          </button>
+        )
+      })}
       {!failed && <span className="planet-scene__hint mono">ARRASTE PARA GIRAR</span>}
       {!failed && (
         <div className="planet-scene__map-switch" role="group" aria-label="Tipo de mapa">
