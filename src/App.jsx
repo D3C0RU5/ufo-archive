@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import EarthGlobe from './EarthGlobe.jsx'
 import { sightings } from './sightings.js'
+import { filterSightings } from './dateFilter.js'
+import PeriodFilter from './PeriodFilter.jsx'
 
 function OrbitMark() {
   return (
@@ -13,13 +15,22 @@ function OrbitMark() {
 export default function App() {
   const [selectedId, setSelectedId] = useState(null)
   const [imageIndex, setImageIndex] = useState(0)
+  const [dateRange, setDateRange] = useState({ from: '', to: '' })
   const detailRef = useRef(null)
   const panelRef = useRef(null)
-  const selected = sightings.find(({ id }) => id === selectedId)
+  const visibleSightings = filterSightings(sightings, dateRange)
+  const selected = visibleSightings.find(({ id }) => id === selectedId)
   const selectedImage = selected?.images[imageIndex]
 
   function selectSighting(id) {
     setSelectedId(id)
+    setImageIndex(0)
+  }
+
+  function changeDateRange(nextFilter) {
+    const nextSightings = filterSightings(sightings, nextFilter)
+    setDateRange(nextFilter)
+    setSelectedId((id) => nextSightings.some((sighting) => sighting.id === id) ? id : null)
     setImageIndex(0)
   }
 
@@ -44,19 +55,14 @@ export default function App() {
 
       <main className="explorer" id="inicio">
         <section className="explorer__map" aria-labelledby="map-title">
-          <div className="explorer__map-heading">
-            <div>
-              <p className="eyebrow"><span className="live-dot" /> MAPA INTERATIVO</p>
-              <h1 id="map-title">Avistamentos <em>no globo.</em></h1>
-            </div>
-            <span className="explorer__map-count mono">{String(sightings.length).padStart(2, '0')} PONTOS</span>
-          </div>
+          <h1 className="sr-only" id="map-title">Mapa de avistamentos</h1>
+          <PeriodFilter value={dateRange} onChange={changeDateRange} sightings={sightings} count={visibleSightings.length} />
           <div className="planet-scene">
             <span className="planet-scene__orbit planet-scene__orbit--one" aria-hidden="true" />
             <span className="planet-scene__orbit planet-scene__orbit--two" aria-hidden="true" />
-            <EarthGlobe selectedSightingId={selectedId} onSelectSighting={selectSighting} />
+            <EarthGlobe selectedSightingId={selected?.id ?? null} visibleSightings={visibleSightings} onSelectSighting={selectSighting} />
           </div>
-          <p className="explorer__map-note mono">PONTOS APROXIMADOS · ARRASTE O GLOBO PARA EXPLORAR</p>
+          <p className="explorer__map-note mono">PONTOS APROXIMADOS · POSIÇÃO POR IP APROXIMADA · ARRASTE O GLOBO PARA EXPLORAR</p>
         </section>
 
         <aside className="explorer__panel" ref={panelRef} aria-labelledby="panel-title">
@@ -67,7 +73,7 @@ export default function App() {
           </div>
 
           <div className="sighting-list" aria-label="Relatos disponíveis">
-            {sightings.map((sighting, index) => (
+            {visibleSightings.map((sighting, index) => (
               <button
                 key={sighting.id}
                 className={`sighting-list__item ${selectedId === sighting.id ? 'sighting-list__item--active' : ''}`}
@@ -84,6 +90,8 @@ export default function App() {
               </button>
             ))}
           </div>
+
+          {visibleSightings.length === 0 && <p className="sighting-list__none">Nenhum relato neste intervalo. Escolha outro período ou selecione Todos.</p>}
 
           {selected ? (
             <article className="sighting-detail" ref={detailRef} aria-live="polite">
@@ -121,12 +129,12 @@ export default function App() {
               </div>
               <a className="sighting-detail__source mono" href={selected.sourceUrl} target="_blank" rel="noopener noreferrer">ABRIR FONTE DO RELATO ↗</a>
             </article>
-          ) : (
+          ) : visibleSightings.length > 0 ? (
             <div className="sighting-empty" aria-hidden="true">
               <span>◎</span>
               <p>Escolha um ponto para ver o relato e as imagens aqui.</p>
             </div>
-          )}
+          ) : null}
         </aside>
       </main>
 
